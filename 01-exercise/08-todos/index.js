@@ -5,13 +5,54 @@ const form = document.querySelector('form');
 const input = document.querySelector('input');
 const ul = document.querySelector('ul');
 
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
+let todos = [];
+const delItem = (event) => {
+    const target = event.target.parentElement;
 
-  if (input.value !== '') {
+    todos = todos.filter((todo) => todo.id != target.id);
+    save();
+    target.remove();
+}
+
+const save = () => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+}
+
+const addItem = (todo) => {
+  if (todo.text !== '') {
     const li = document.createElement('li');
-    li.innerText = input.value;
+    const button = document.createElement('button');
+    const span = document.createElement('span');
+
+    span.innerText= todo.text;
+    button.innerText= '삭제';
+
+    button.addEventListener('click', delItem);
+
+    li.appendChild(span);
+    li.appendChild(button);
+    li.id = todo.id;
     ul.appendChild(li);
-    input.value = '';
   }
-});
+};
+const handler = (event) => {
+    event.preventDefault();
+    const todo = {
+        id: Date.now(),
+        text: input.value,
+    }
+
+    todos.push(todo);
+    addItem(todo);
+    save();
+    input.value = '';
+};
+
+const init = () => {
+    const savedTodos = JSON.parse(localStorage.getItem('todos'));
+    savedTodos.forEach((todo) => addItem(todo));
+
+    todos = savedTodos;
+}
+form.addEventListener('submit', handler);
+init();
